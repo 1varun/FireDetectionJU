@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FireDetectionJU</string>
+    <string name="output">Output Appears Here!!!</string>
+    <string name="main_button">Shoot and Analyze</string>
+</resources>
