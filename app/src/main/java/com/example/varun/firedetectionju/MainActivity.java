@@ -404,7 +404,5 @@ public class MainActivity extends AppCompatActivity {
             cancelButton.setVisibility(View.INVISIBLE);
             mainButton.setText(R.string.main_button);
         }
-
-
     }
 }
