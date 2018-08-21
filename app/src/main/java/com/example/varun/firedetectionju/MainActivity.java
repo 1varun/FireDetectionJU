@@ -30,7 +30,6 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     Button mainButton;
     ImageButton cancelButton;
     ProgressBar progressBar;
-    ImageView imageView;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static{
@@ -128,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         mainButton = findViewById(R.id.mainButton);
         cancelButton = findViewById(R.id.cancelButton);
         progressBar = findViewById(R.id.progressBar);
-        imageView = findViewById(R.id.imageView);
+        output = findViewById(R.id.output);
         progressBar.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
 
@@ -176,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             manager.openCamera(cameraId,stateCallback,null);
-
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -293,7 +290,6 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-
                 }
             },mBackgroundHandler);
 
@@ -352,7 +348,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
     }
 
     private void generateOutput() throws InterruptedException {
@@ -362,10 +357,9 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 cancelButton.setVisibility(View.VISIBLE);
                 mainButton.setText(R.string.analysis_button_msg);
-
             }
         });
-        output = findViewById(R.id.output);
+
         final MyAsyncTask task = new MyAsyncTask();
         task.execute();
         cancelButton.setOnClickListener(new View.OnClickListener() {
