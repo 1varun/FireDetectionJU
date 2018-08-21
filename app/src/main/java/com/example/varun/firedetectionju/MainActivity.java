@@ -16,6 +16,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -28,6 +29,8 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +45,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private TextureView textureView;
+    private TextView output;
+    Button mainButton;
+    ImageButton cancelButton;
+    ProgressBar progressBar;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static{
@@ -61,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 200;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+    private Handler handler;
 
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -69,9 +77,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-
-        }
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) { }
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
@@ -79,9 +85,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
-        }
+        public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) { }
     };
 
     CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
@@ -118,7 +122,12 @@ public class MainActivity extends AppCompatActivity {
         textureView = findViewById(R.id.textureView);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
-        Button mainButton = findViewById(R.id.mainButton);
+        mainButton = findViewById(R.id.mainButton);
+        cancelButton = findViewById(R.id.cancelButton);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
+        cancelButton.setVisibility(View.INVISIBLE);
+        handler = new Handler(getApplicationContext().getMainLooper());
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -256,9 +265,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(MainActivity.this, "Saved "+file, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Image Saved", Toast.LENGTH_SHORT).show();
                     createCameraPreview();
-                    generateOutput();
+                    try {
+                        generateOutput();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             };
 
@@ -336,13 +349,62 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void generateOutput(){
-        TextView output = findViewById(R.id.output);
-        AnalyseFire fire = new AnalyseFire();
-        int fireCheck = fire.fireCheck();
-        if (fireCheck==0)
-            output.setText("No FIRE Detected!");
-        else
-            output.setText("FIRE Detected!");
+    private void generateOutput() throws InterruptedException {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+                cancelButton.setVisibility(View.VISIBLE);
+                mainButton.setText(R.string.Analysing_msg);
+            }
+        });
+        output = findViewById(R.id.output);
+        final MyAsyncTask task = new MyAsyncTask();
+        task.execute();
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                task.cancel(true);
+            }
+        });
+    }
+
+    private class MyAsyncTask extends AsyncTask<Void, Integer, Integer> {
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            AnalyseFire fire = new AnalyseFire();
+            return fire.fireCheck();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            output.setText("Analysing the photo!!!");
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            int fireCheck = integer;
+            if (fireCheck==0)
+                output.setText("No FIRE Detected!");
+            else
+                output.setText("FIRE Detected!");
+
+            progressBar.setVisibility(View.INVISIBLE);
+            cancelButton.setVisibility(View.INVISIBLE);
+            mainButton.setText(R.string.main_button);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            progressBar.setVisibility(View.INVISIBLE);
+            cancelButton.setVisibility(View.INVISIBLE);
+            mainButton.setText(R.string.main_button);
+        }
+
+
     }
 }

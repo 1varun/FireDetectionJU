@@ -2,4 +2,6 @@
     <string name="app_name">FireDetectionJU</string>
     <string name="output">Output Appears Here!!!</string>
     <string name="main_button">Shoot and Analyze</string>
+    <string name="cancel_processing_msg">Cancel Processing</string>
+    <string name="Analysing_msg">Analysing Now</string>
 </resources>
