@@ -30,6 +30,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     Button mainButton;
     ImageButton cancelButton;
     ProgressBar progressBar;
+    ImageView imageView;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static{
@@ -122,15 +124,19 @@ public class MainActivity extends AppCompatActivity {
         textureView = findViewById(R.id.textureView);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
+
         mainButton = findViewById(R.id.mainButton);
         cancelButton = findViewById(R.id.cancelButton);
         progressBar = findViewById(R.id.progressBar);
+        imageView = findViewById(R.id.imageView);
         progressBar.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
+
         handler = new Handler(getApplicationContext().getMainLooper());
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mainButton.setEnabled(false);
                 takePicture();
             }
         });
@@ -356,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 cancelButton.setVisibility(View.VISIBLE);
                 mainButton.setText(R.string.analysis_button_msg);
+
             }
         });
         output = findViewById(R.id.output);
@@ -396,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
             mainButton.setText(R.string.main_button);
+            mainButton.setEnabled(true);
         }
 
         @Override
@@ -404,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
             mainButton.setText(R.string.main_button);
+            mainButton.setEnabled(true);
             output.setText(R.string.analysis_cancel_msg);
         }
     }
