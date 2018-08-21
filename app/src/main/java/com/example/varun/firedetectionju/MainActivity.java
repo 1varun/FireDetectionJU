@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 progressBar.setVisibility(View.VISIBLE);
                 cancelButton.setVisibility(View.VISIBLE);
-                mainButton.setText(R.string.Analysing_msg);
+                mainButton.setText(R.string.analysis_button_msg);
             }
         });
         output = findViewById(R.id.output);
@@ -380,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            output.setText("Analysing the photo!!!");
+            output.setText(R.string.analysis_msg);
         }
 
         @Override
@@ -391,6 +391,7 @@ public class MainActivity extends AppCompatActivity {
                 output.setText("No FIRE Detected!");
             else
                 output.setText("FIRE Detected!");
+
 
             progressBar.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
@@ -403,6 +404,7 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
             mainButton.setText(R.string.main_button);
+            output.setText(R.string.analysis_cancel_msg);
         }
     }
 }

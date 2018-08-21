@@ -34,7 +34,8 @@
                 style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/mainButton"
@@ -52,6 +53,7 @@
                 android:layout_weight="1"
                 android:backgroundTintMode="src_over"
                 android:contentDescription="@string/cancel_processing_msg"
+                android:visibility="invisible"
                 app:srcCompat="@android:drawable/ic_delete" />
         </LinearLayout>
 
