@@ -2,6 +2,14 @@ package com.example.varun.firedetectionju;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
+
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,57 +22,47 @@ public class AnalyseFire {
     String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE.jpg";
 
     public int fireCheck(){
-        Bitmap img = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        File f=new File(pathname);
 
-        try {
-            img = BitmapFactory.decodeStream(new FileInputStream(f), null, options);
-        }
-        catch(IOException e) {
-            System.out.println(e);
-            return 0;
-        }
-        int width = img.getWidth();
-        int height = img.getHeight();
-        double[][] rValue = new double[width][height];
-        double[][] gValue = new double[width][height];
-        double[][] bValue = new double[width][height];
-        double[][] yValue = new double[width][height];
-        double[][] cbValue = new double[width][height];
-        double[][] crValue = new double[width][height];
+        Mat imgRGB = new Mat(7,7, CvType.CV_8UC1);
+        Log.d("MyTAG", "test1");
+        //Mat imgRGB = new Mat();
+        Mat inputFrame = Imgcodecs.imread(pathname, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+        Log.d("MyTAG", "test2");
+        Imgproc.cvtColor(inputFrame, imgRGB, Imgproc.COLOR_RGBA2RGB);
+        Log.d("MyTAG", "test3");
+        int width = imgRGB.rows();
+        int height = imgRGB.cols();
+        Log.d("MyTAG", Integer.toString(width));
+        Log.d("MyTAG", Integer.toString(height));
+        Mat imgYCbCr = new Mat();
+        Imgproc.cvtColor(imgRGB, imgYCbCr, Imgproc.COLOR_RGB2YCrCb);
         double rMean,gMean,bMean;
         double rSum = 0.0,gSum = 0.0,bSum = 0.0;
 
-        int pixel,R,G,B;
-        double Y,Cb,Cr;
+        double[] rgb;
+        double[] ycbcr;
         double yMean,cbMean,crMean;
         double ySum = 0.0,cbSum = 0.0,crSum = 0.0;
 
         for(int y = 0;y<height;y++) {
             for(int x = 0;x<width;x++) {
-                pixel = img.
-                R = (pixel >> 16) & 0xff;
-                G = (pixel >> 8) & 0xff;
-                B = pixel & 0xff;
-                rSum += (double)R;
-                gSum += (double)G;
-                bSum += (double)B;
-                rValue[x][y] = (double)R;
-                gValue[x][y] = (double)G;
-                bValue[x][y] = (double)B;
-                Y = 16 + (0.2568*R) + (0.5041*G) + (0.0979*B);
-                Cb = 128 - (0.1482*R) - (0.2910*G) + (0.4392*B);
-                Cr = 128 + (0.4392*R) - (0.3678*G) - (0.0714*B);
-                ySum += Y;
-                cbSum += Cb;
-                crSum += Cr;
-                yValue[x][y] = Y;
-                cbValue[x][y] = Cb;
-                crValue[x][y] = Cr;
+                rgb = imgRGB.get(x, y);
+                double rValue = rgb[0];
+                double gValue = rgb[1];
+                double bValue = rgb[2];
+                ycbcr =imgYCbCr.get(x, y);
+                double yValue = ycbcr[0];
+                double crValue = ycbcr[1];
+                double cbValue = ycbcr[2];
+                rSum += rValue;
+                gSum += gValue;
+                bSum += bValue;
+                ySum += yValue;
+                cbSum += cbValue;
+                crSum += crValue;
             }
         }
+        Log.d("MyTAG", "test4");
 
         int totalPixels = width*height;
 
@@ -81,23 +79,34 @@ public class AnalyseFire {
 
         for(int y = 0;y<height;y++) {
             for(int x = 0;x<width;x++) {
-                if((rValue[x][y] > 225.0 && gValue[x][y] > 100.0 && bValue[x][y] < 140.0) &&
-                        (rValue[x][y] > gValue[x][y] && gValue[x][y] > bValue[x][y])
-                        && (rValue[x][y] > rMean && gValue[x][y] > gMean && bValue[x][y] < bMean)) {
+                rgb = imgRGB.get(x, y);
+                double rValue = rgb[0];
+                double gValue = rgb[1];
+                double bValue = rgb[2];
+                ycbcr =imgYCbCr.get(x, y);
+                double yValue = ycbcr[0];
+                double crValue = ycbcr[1];
+                double cbValue = ycbcr[2];
+                if((rValue > 225.0 && gValue > 100.0 && bValue < 140.0) &&
+                        (rValue > gValue && gValue > bValue)
+                        && (rValue > rMean && gValue > gMean && bValue < bMean)) {
                     rgbFlag = true;
                 }
-                if((yValue[x][y] >= cbValue[x][y]) && (crValue[x][y] >= cbValue[x][y])
-                        && (yValue[x][y] >= yMean && cbValue[x][y] <= cbMean && crValue[x][y] >= crMean)
-                        && (crValue[x][y] - cbValue[x][y] >= 30.0)
-                        && (cbValue[x][y] <= 120.0 && crValue[x][y] >= 150.0)) {
+                if((yValue >= cbValue) && (crValue >= cbValue)
+                        && (yValue >= yMean && cbValue <= cbMean && crValue >= crMean)
+                        && (crValue - cbValue >= 30.0)
+                        && (cbValue <= 120.0 && crValue >= 150.0)) {
                     yCbCrFlag = true;
                 }
             }
         }
+        Log.d("MyTAG", "test5");
         if(rgbFlag && yCbCrFlag) {
+            Log.d("MyTAG", "fire");
             return 1;
         }
         else {
+            Log.d("MyTAG", "not fire");
             return 0;
         }
     }
