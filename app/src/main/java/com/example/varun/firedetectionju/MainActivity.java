@@ -35,6 +35,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 
@@ -47,14 +49,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
-    static{
-        if (!OpenCVLoader.initDebug()) {
-            Log.e( "MyTag" + " - Error", "Unable to load OpenCV");
-        } else {
-            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        }
-    }
 
     private TextureView textureView;
     private TextView output;
@@ -150,6 +144,20 @@ public class MainActivity extends AppCompatActivity {
                 takePicture();
             }
         });
+
+        baseLoaderCallback = new BaseLoaderCallback(this) {
+            @Override
+            public void onManagerConnected(int status) {
+                switch (status) {
+                    case LoaderCallbackInterface.SUCCESS:
+                        Log.d("MyTAG", "Loader Interface Success.");
+                        break;
+                    default:
+                        super.onManagerConnected(status);
+                        break;
+                }
+            }
+        };
     }
 
     @Override
