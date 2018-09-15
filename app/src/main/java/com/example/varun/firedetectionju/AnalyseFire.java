@@ -1,9 +1,11 @@
 package com.example.varun.firedetectionju;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
 import java.lang.Math;
 import java.util.Scanner;
 
@@ -12,12 +14,13 @@ public class AnalyseFire {
     String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE.jpg";
 
     public int fireCheck(){
-        BufferedImage img = null;
-        File f;
+        Bitmap img = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        File f=new File(pathname);
 
         try {
-            f = new File(pathname);
-            img = ImageIO.read(f);
+            img = BitmapFactory.decodeStream(new FileInputStream(f), null, options);
         }
         catch(IOException e) {
             System.out.println(e);
@@ -41,7 +44,7 @@ public class AnalyseFire {
 
         for(int y = 0;y<height;y++) {
             for(int x = 0;x<width;x++) {
-                pixel = img.getRGB(x, y);
+                pixel = img.
                 R = (pixel >> 16) & 0xff;
                 G = (pixel >> 8) & 0xff;
                 B = pixel & 0xff;
