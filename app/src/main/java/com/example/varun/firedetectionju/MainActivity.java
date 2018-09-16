@@ -49,12 +49,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextureView textureView;
-    private TextView output;
-    Button mainButton;
-    ImageButton cancelButton;
-    ProgressBar progressBar;
-
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static{
         ORIENTATIONS.append(Surface.ROTATION_0,90);
@@ -62,6 +56,12 @@ public class MainActivity extends AppCompatActivity {
         ORIENTATIONS.append(Surface.ROTATION_180,270);
         ORIENTATIONS.append(Surface.ROTATION_270,180);
     }
+
+    private TextureView textureView;
+    private TextView output;
+    Button mainButton;
+    ImageButton cancelButton;
+    ProgressBar progressBar;
 
     private String cameraId;
     private CameraDevice cameraDevice;
@@ -139,10 +139,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.CAMERA},
-                1);
 
         textureView = findViewById(R.id.textureView);
         assert textureView != null;
@@ -276,11 +272,11 @@ public class MainActivity extends AppCompatActivity {
             //Capture image with custom size
             int width = 640;
             int height = 480;
-            if(jpegSizes != null && jpegSizes.length > 0)
-            {
-                width = jpegSizes[0].getWidth();
-                height = jpegSizes[0].getHeight();
-            }
+            //if(jpegSizes != null && jpegSizes.length > 0)
+            //{
+            //    width = jpegSizes[0].getWidth();
+            //    height = jpegSizes[0].getHeight();
+            //}
             final ImageReader reader = ImageReader.newInstance(width,height,ImageFormat.JPEG,1);
             List<Surface> outputSurface = new ArrayList<>(2);
             outputSurface.add(reader.getSurface());

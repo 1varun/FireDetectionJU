@@ -14,6 +14,7 @@ public class AnalyseFire {
     String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE.jpg";
 
     public int fireCheck() {
+        Log.d("MyTAG", "Inside Analyze Fire Class");
         Mat imgRGB = new Mat();
         Mat imgYCbCr = new Mat();
         Mat inputFrame = Imgcodecs.imread(pathname);
