@@ -38,7 +38,6 @@ import android.widget.Toast;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -75,6 +74,22 @@ public class MainActivity extends AppCompatActivity {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
     private Handler handler;
+
+    private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i("TAG", "OpenCV loaded successfully");
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
 
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -125,6 +140,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.CAMERA},
+                1);
+
         textureView = findViewById(R.id.textureView);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
@@ -144,20 +163,6 @@ public class MainActivity extends AppCompatActivity {
                 takePicture();
             }
         });
-
-        baseLoaderCallback = new BaseLoaderCallback(this) {
-            @Override
-            public void onManagerConnected(int status) {
-                switch (status) {
-                    case LoaderCallbackInterface.SUCCESS:
-                        Log.d("MyTAG", "Loader Interface Success.");
-                        break;
-                    default:
-                        super.onManagerConnected(status);
-                        break;
-                }
-            }
-        };
     }
 
     @Override
@@ -168,6 +173,14 @@ public class MainActivity extends AppCompatActivity {
             openCamera();
         else
             textureView.setSurfaceTextureListener(textureListener);
+
+        if (!OpenCVLoader.initDebug()) {
+            Toast.makeText(getApplicationContext(), "OpenCV Load Failed!", Toast.LENGTH_SHORT).show();
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, baseLoaderCallback);
+        } else {
+            baseLoaderCallback.onManagerConnected(BaseLoaderCallback.SUCCESS);
+        }
+
     }
 
     @Override

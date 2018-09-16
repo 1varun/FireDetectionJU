@@ -13,7 +13,7 @@ public class AnalyseFire {
 
     String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE.jpg";
 
-    public void fireCheck() {
+    public int fireCheck() {
         Mat imgRGB = new Mat();
         Mat imgYCbCr = new Mat();
         Mat inputFrame = Imgcodecs.imread(pathname);
@@ -96,15 +96,17 @@ public class AnalyseFire {
                     yCbCrFlag = true;
                 }
                 if(rgbFlag && yCbCrFlag)
-                    break;
+                    return 1;
             }
         }
         Log.d("MyTAG", "Loop Over");
         if(rgbFlag && yCbCrFlag) {
             Log.d("MyTAG", "fire");
+            return 1;
         }
         else {
             Log.d("MyTAG", "not fire");
+            return 0;
         }
     }
 }
