@@ -85,7 +85,7 @@ public class AnalyseFire {
                 double yValue = ycbcr[0];
                 double crValue = ycbcr[1];
                 double cbValue = ycbcr[2];
-                if((rValue > 225.0 && gValue > 100.0 && bValue < 140.0) &&
+                if((rValue > 200.0 && gValue > 100.0 && bValue < 140.0) &&
                         (rValue > gValue && gValue > bValue)
                         && (rValue > rMean && gValue > gMean && bValue < bMean)) {
                     rgbFlag = true;
