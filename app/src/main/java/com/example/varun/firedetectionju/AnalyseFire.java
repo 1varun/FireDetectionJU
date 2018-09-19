@@ -72,6 +72,10 @@ public class AnalyseFire {
         double[] ycbcr;
         boolean rgbFlag = false;
         boolean yCbCrFlag = false;
+        boolean rFlag1 = false;
+        boolean rFlag2 = false;
+        boolean rFlag3 = false;
+
 
         Log.d("MyTAG", "Entering Loop");
         for(int y = 0;y<height;y++) {
@@ -85,19 +89,16 @@ public class AnalyseFire {
                 double yValue = ycbcr[0];
                 double crValue = ycbcr[1];
                 double cbValue = ycbcr[2];
-                if((rValue > 200.0 && gValue > 100.0 && bValue < 140.0) &&
-                        (rValue > gValue && gValue > bValue)
-                        && (rValue > rMean && gValue > gMean && bValue < bMean)) {
+                if ((rValue > gValue && gValue > bValue) &&
+                        (rValue > rMean && gValue > gMean && bValue < bMean))
                     rgbFlag = true;
-                }
+
                 if((yValue >= cbValue) && (crValue >= cbValue)
                         && (yValue >= yMean && cbValue <= cbMean && crValue >= crMean)
                         && (crValue - cbValue >= 30.0)
                         && (cbValue <= 120.0 && crValue >= 150.0)) {
                     yCbCrFlag = true;
                 }
-                if(rgbFlag && yCbCrFlag)
-                    return 1;
             }
         }
         Log.d("MyTAG", "Loop Over");
