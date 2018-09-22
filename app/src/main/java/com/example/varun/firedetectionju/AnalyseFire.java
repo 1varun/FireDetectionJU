@@ -15,10 +15,8 @@ public class AnalyseFire {
 
     public int fireCheck() {
         Log.d("MyTAG", "Inside Analyze Fire Class");
-        Mat imgRGB = new Mat();
         Mat imgYCbCr = new Mat();
-        Mat inputFrame = Imgcodecs.imread(pathname);
-        Imgproc.cvtColor(inputFrame, imgRGB, Imgproc.COLOR_RGBA2RGB);
+        Mat imgRGB = Imgcodecs.imread(pathname);
         Imgproc.cvtColor(imgRGB, imgYCbCr, Imgproc.COLOR_BGR2YCrCb);
         int width = imgRGB.rows();
         int height = imgRGB.cols();
@@ -72,9 +70,6 @@ public class AnalyseFire {
         double[] ycbcr;
         boolean rgbFlag = false;
         boolean yCbCrFlag = false;
-        boolean rFlag1 = false;
-        boolean rFlag2 = false;
-        boolean rFlag3 = false;
 
 
         Log.d("MyTAG", "Entering Loop");
