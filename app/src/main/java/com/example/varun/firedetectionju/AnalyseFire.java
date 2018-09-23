@@ -14,14 +14,14 @@ public class AnalyseFire {
     String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE.jpg";
 
     public int fireCheck() {
-        Log.d("MyTAG", "Inside Analyze Fire Class");
+        Log.d("MyTAG1", "Inside Analyze Fire Class");
         Mat imgYCbCr = new Mat();
         Mat imgRGB = Imgcodecs.imread(pathname);
         Imgproc.cvtColor(imgRGB, imgYCbCr, Imgproc.COLOR_BGR2YCrCb);
         int width = imgRGB.rows();
         int height = imgRGB.cols();
-        Log.d("MyTAG", "Width: "+Integer.toString(width));
-        Log.d("MyTAG", "Height: "+Integer.toString(height));
+        Log.d("MyTAG1", "Width: "+Integer.toString(width));
+        Log.d("MyTAG1", "Height: "+Integer.toString(height));
 
         List<Mat> lRgb = new ArrayList<>(3);
         Core.split(imgRGB, lRgb);
@@ -52,18 +52,18 @@ public class AnalyseFire {
         cbMean =(cbSum.val[0])/totalPixels;
         crMean =(crSum.val[0])/totalPixels;
 
-        Log.d("MyTAG", Double.toString(rSum.val[0]));
-        Log.d("MyTAG", Double.toString(gSum.val[0]));
-        Log.d("MyTAG", Double.toString(bSum.val[0]));
-        Log.d("MyTAG", Double.toString(ySum.val[0]));
-        Log.d("MyTAG", Double.toString(cbSum.val[0]));
-        Log.d("MyTAG", Double.toString(crSum.val[0]));
-        Log.d("MyTAG", Double.toString(rMean));
-        Log.d("MyTAG", Double.toString(gMean));
-        Log.d("MyTAG", Double.toString(bMean));
-        Log.d("MyTAG", Double.toString(yMean));
-        Log.d("MyTAG", Double.toString(cbMean));
-        Log.d("MyTAG", Double.toString(crMean));
+        Log.d("MyTAG1", Double.toString(rSum.val[0]));
+        Log.d("MyTAG1", Double.toString(gSum.val[0]));
+        Log.d("MyTAG1", Double.toString(bSum.val[0]));
+        Log.d("MyTAG1", Double.toString(ySum.val[0]));
+        Log.d("MyTAG1", Double.toString(cbSum.val[0]));
+        Log.d("MyTAG1", Double.toString(crSum.val[0]));
+        Log.d("MyTAG1", Double.toString(rMean));
+        Log.d("MyTAG1", Double.toString(gMean));
+        Log.d("MyTAG1", Double.toString(bMean));
+        Log.d("MyTAG1", Double.toString(yMean));
+        Log.d("MyTAG1", Double.toString(cbMean));
+        Log.d("MyTAG1", Double.toString(crMean));
 
 
         double[] rgb;
@@ -72,7 +72,7 @@ public class AnalyseFire {
         boolean yCbCrFlag = false;
 
 
-        Log.d("MyTAG", "Entering Loop");
+        Log.d("MyTAG1", "Entering Loop");
         for(int y = 0;y<height;y++) {
             //Log.d("MyTAG", Integer.toString(y));
             for(int x = 0;x<width;x++) {
@@ -96,13 +96,13 @@ public class AnalyseFire {
                 }
             }
         }
-        Log.d("MyTAG", "Loop Over");
+        Log.d("MyTAG1", "Loop Over");
         if(rgbFlag && yCbCrFlag) {
-            Log.d("MyTAG", "fire");
+            Log.d("MyTAG1", "fire");
             return 1;
         }
         else {
-            Log.d("MyTAG", "not fire");
+            Log.d("MyTAG1", "not fire");
             return 0;
         }
     }

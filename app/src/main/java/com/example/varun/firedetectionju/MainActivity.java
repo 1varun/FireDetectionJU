@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextureView textureView;
     private TextView output;
+    TextView secondProg;
     Button mainButton;
     ImageButton cancelButton;
     ProgressBar progressBar;
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
     private Handler handler;
+
+    final MyAsyncTask2 task2 = new MyAsyncTask2();
 
     private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -148,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.cancelButton);
         progressBar = findViewById(R.id.progressBar);
         output = findViewById(R.id.output);
+        secondProg = findViewById(R.id.textView);
+        secondProg.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
 
@@ -156,6 +161,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mainButton.setEnabled(false);
+                if(task2.getStatus() == AsyncTask.Status.RUNNING){
+                    task2.cancel(true);
+                }
                 takePicture();
             }
         });
@@ -391,10 +399,12 @@ public class MainActivity extends AppCompatActivity {
 
         final MyAsyncTask task = new MyAsyncTask();
         task.execute();
+        task2.execute();
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 task.cancel(true);
+                task2.cancel(true);
             }
         });
     }
@@ -404,6 +414,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Void... voids) {
             AnalyseFire fire = new AnalyseFire();
+            AnalyseFire2 fire2 = new AnalyseFire2();
             return fire.fireCheck();
         }
 
@@ -417,10 +428,14 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
             int fireCheck = integer;
-            if (fireCheck==0)
+            if (fireCheck==0) {
                 output.setText("No FIRE Detected!");
-            else
-                output.setText("FIRE Detected!");
+                task2.cancel(true);
+            }
+            else {
+                output.setText("FIRE Detected by 1st Algo!");
+                secondProg.setVisibility(View.VISIBLE);
+            }
 
 
             progressBar.setVisibility(View.INVISIBLE);
@@ -437,6 +452,38 @@ public class MainActivity extends AppCompatActivity {
             mainButton.setText(R.string.main_button);
             mainButton.setEnabled(true);
             output.setText(R.string.analysis_cancel_msg);
+        }
+    }
+
+    private class MyAsyncTask2 extends AsyncTask<Void, Integer, Integer> {
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            AnalyseFire2 fire2 = new AnalyseFire2();
+            return fire2.fireCheck();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            int fireCheck = integer;
+            if (fireCheck==0)
+                output.setText("FIRE Detected only by 1st Algo!");
+            else
+                output.setText("FIRE Detected by both Algo!");
+
+            secondProg.setVisibility(View.INVISIBLE);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            secondProg.setVisibility(View.INVISIBLE);
         }
     }
 }
