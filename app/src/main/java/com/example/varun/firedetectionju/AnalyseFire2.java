@@ -15,7 +15,7 @@ import java.util.List;
 
 public class AnalyseFire2 {
 
-    String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/fireImage10.jpg";
+    String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE_1.jpg";
 
     public int fireCheck(){
         //Mat imgHSV = inputFrame.rgba();

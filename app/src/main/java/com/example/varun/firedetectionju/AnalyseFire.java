@@ -11,7 +11,7 @@ import java.util.List;
 
 public class AnalyseFire {
 
-    String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE.jpg";
+    String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE_1.jpg";
 
     public int fireCheck() {
         Log.d("MyTAG1", "Inside Analyze Fire Class");
@@ -70,6 +70,7 @@ public class AnalyseFire {
         double[] ycbcr;
         boolean rgbFlag = false;
         boolean yCbCrFlag = false;
+        int pixelCount = 0;
 
 
         Log.d("MyTAG1", "Entering Loop");
@@ -84,20 +85,24 @@ public class AnalyseFire {
                 double yValue = ycbcr[0];
                 double crValue = ycbcr[1];
                 double cbValue = ycbcr[2];
+
                 if ((rValue > gValue && gValue > bValue) &&
-                        (rValue > rMean && gValue > gMean && bValue < bMean))
+                        (rValue > rMean && gValue > gMean && bValue < bMean)) {
                     rgbFlag = true;
+                    pixelCount++;
+                }
 
                 if((yValue >= cbValue) && (crValue >= cbValue)
                         && (yValue >= yMean && cbValue <= cbMean && crValue >= crMean)
                         && (crValue - cbValue >= 30.0)
                         && (cbValue <= 120.0 && crValue >= 150.0)) {
                     yCbCrFlag = true;
+                    pixelCount++;
                 }
             }
         }
         Log.d("MyTAG1", "Loop Over");
-        if(rgbFlag && yCbCrFlag) {
+        if(rgbFlag && yCbCrFlag && pixelCount > 10000) {
             Log.d("MyTAG1", "fire");
             return 1;
         }

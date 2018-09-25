@@ -38,6 +38,12 @@ import android.widget.Toast;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +54,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE_1.jpg";
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static{
@@ -69,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession cameraCaptureSessions;
     private CaptureRequest.Builder captureRequestBuilder;
     private Size imageDimension;
+    int numberOfPicture = 2;
+    int mPictureCounter = 1;
+    int nameCounter = 1;
 
     private File file;
     private static final int REQUEST_CAMERA_PERMISSION = 200;
@@ -134,6 +145,9 @@ public class MainActivity extends AppCompatActivity {
     ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
+            file = new File(getExternalFilesDir(null), "FIRE_SAMPLE_"+Integer.toString(nameCounter++)+".jpg");
+            if (nameCounter == (numberOfPicture+1))
+                nameCounter = 1;
             mBackgroundHandler.post(new ImageSaver(imageReader.acquireLatestImage(), file));
         }
     };
@@ -164,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 if(task2.getStatus() == AsyncTask.Status.RUNNING){
                     task2.cancel(true);
                 }
+                while (task2.isCancelled()){}
                 takePicture();
             }
         });
@@ -290,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
             outputSurface.add(reader.getSurface());
             outputSurface.add(new Surface(textureView.getSurfaceTexture()));
 
+            final List<CaptureRequest> captureList = new ArrayList<CaptureRequest>();
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             captureBuilder.addTarget(reader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
@@ -298,19 +314,25 @@ public class MainActivity extends AppCompatActivity {
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION,ORIENTATIONS.get(rotation));
 
-            file = new File(getExternalFilesDir(null), "FIRE_SAMPLE.jpg");
+            for (int i=0;i<numberOfPicture;i++) {
+                captureList.add(captureBuilder.build());
+            }
 
             reader.setOnImageAvailableListener(readerListener,mBackgroundHandler);
             final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(MainActivity.this, "Image Saved", Toast.LENGTH_SHORT).show();
-                    createCameraPreview();
-                    try {
-                        generateOutput();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    mPictureCounter++;
+                    if (mPictureCounter >= (numberOfPicture+1)) {
+                        Toast.makeText(MainActivity.this, "Image Saved", Toast.LENGTH_SHORT).show();
+                        mPictureCounter = 1;
+                        createCameraPreview();
+                        try {
+                            generateOutput();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             };
@@ -319,7 +341,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     try{
-                        cameraCaptureSession.capture(captureBuilder.build(),captureListener,mBackgroundHandler);
+                        cameraCaptureSession.stopRepeating();
+                        cameraCaptureSession.captureBurst(captureList, captureListener ,mBackgroundHandler);
                     } catch (CameraAccessException e) {
                         e.printStackTrace();
                     }
@@ -459,8 +482,122 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Void... voids) {
-            AnalyseFire2 fire2 = new AnalyseFire2();
-            return fire2.fireCheck();
+
+            Mat imgHSV = Imgcodecs.imread(pathname);
+            int x1 = imgHSV.rows();
+            int y1 = imgHSV.cols();
+            imgHSV.convertTo(imgHSV, CvType.CV_32FC3, 1.0/255.0);
+            Imgproc.cvtColor(imgHSV, imgHSV, Imgproc.COLOR_BGR2HSV);
+
+            List<Mat> lHsv = new ArrayList<Mat>(3);
+            Core.split(imgHSV, lHsv);
+            Mat hChannel = lHsv.get(0);
+            Mat sChannel = lHsv.get(1);
+            Mat vChannel = lHsv.get(2);
+
+            Core.multiply(sChannel, new Scalar(2), sChannel);
+            Mat newS = sChannel.clone();
+
+            Scalar meanV = Core.mean(vChannel);
+            Mat newV = vChannel_correction(vChannel, meanV.val[0]);
+
+            List<Mat> listMat = Arrays.asList(hChannel, newS, newV);
+            Core.merge(listMat, imgHSV);
+            Imgproc.cvtColor(imgHSV, imgHSV, Imgproc.COLOR_HSV2RGB);
+
+            List<Mat> klm = new ArrayList<Mat>(3);
+            Core.split(imgHSV, klm);
+            Mat k = klm.get(0);
+            Mat l = klm.get(1);
+            Mat m = klm.get(2);
+
+            Scalar L01 = Core.sumElems(k);
+            Scalar a01 = Core.sumElems(l);
+            Scalar b01 = Core.sumElems(m);
+            double RED = L01.val[0]/(x1*y1);
+            double GREEN = a01.val[0]/(x1*y1);
+            double BLUE = b01.val[0]/(x1*y1);
+
+            Log.d("MyTAG", "L01 : "+L01);
+            Log.d("MyTAG", "a01 : "+a01);
+            Log.d("MyTAG", "b01 : "+b01);
+            Log.d("MyTAG", "RED : "+RED);
+            Log.d("MyTAG", "GREEN : "+GREEN);
+            Log.d("MyTAG", "BLUE : "+BLUE);
+
+            Mat allBlack = Mat.zeros(x1, y1, CvType.CV_32FC1);
+            List<Mat> temp_r = Arrays.asList(k, allBlack, allBlack);
+            List<Mat> temp_g = Arrays.asList(allBlack, l, allBlack);
+            List<Mat> temp_b = Arrays.asList(allBlack, allBlack, m);
+            Mat red = new Mat();
+            Mat green = new Mat();
+            Mat blue = new Mat();
+            Core.merge(temp_r, red);
+            Core.merge(temp_g, green);
+            Core.merge(temp_b, blue);
+
+            Mat a1 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+            Mat b1 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+            Mat g = Mat.zeros(x1, y1, CvType.CV_8UC1);
+            Mat a2 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+            //Mat b2 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+            Mat h = Mat.zeros(x1, y1, CvType.CV_8UC1);
+
+            for(int row=0; row<x1; row++){
+                for(int col=0; col<y1; col++) {
+                    if (isCancelled())
+                        break;
+                    if(k.get(row, col)[0] >= l.get(row, col)[0])
+                        a1.put(row, col, 1);
+                    else
+                        a1.put(row, col, 0);
+
+                    if((k.get(row, col)[0] >= RED) && (l.get(row, col)[0] >= GREEN) && (m.get(row, col)[0] >= BLUE))
+                        b1.put(row, col, 1);
+                    else
+                        b1.put(row, col, 0);
+
+                    if((newS.get(row, col)[0] <= 0.38) && (newV.get(row, col)[0] >= 1))
+                        g.put(row, col, 1);
+                    else
+                        g.put(row, col, 0);
+
+                    if((g.get(row, col)[0]!=0.0) && (a1.get(row, col)[0]!=0.0) && (b1.get(row, col)[0]==1)) {
+                        h.put(row, col, 1);
+                        //newV.put(row, col, 1);
+                        a2.put(row, col, row);
+                        //b2.put(row, col, col);
+                    }
+                    else {
+                        h.put(row, col, 0);
+                        //newV.put(row, col, 0);
+                    }
+                }
+                if (isCancelled())
+                    break;
+            }
+            Log.d("MyTAG", "test3");
+
+            Scalar h_value = Core.sumElems(h);
+            Scalar a2_value = Core.sumElems(a2);
+            Log.d("MyTAG", "h_value :"+h_value);
+            Log.d("MyTAG", "a2_value :"+a2_value);
+
+            if (h_value.val[0] > 300) {
+                //count = count + 1;
+                Log.d("MyTAG", "FIRE");
+
+                //if(a2_value.val[0] < h_value.val[0]) {
+                //Log.d("MyTAG", "FIRE GROWING");
+                //count1=count1+1;
+                //return 10;
+                //}
+                return 1;
+            }
+            else {
+                Log.d("MyTAG", "FIRE NOT DETECTED");
+                return 0;
+            }
         }
 
         @Override
@@ -485,5 +622,17 @@ public class MainActivity extends AppCompatActivity {
             super.onCancelled();
             secondProg.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private static Mat vChannel_correction (Mat matArray, double mean) {
+        Mat return_mat = matArray.clone();
+        for(int col=0; col<matArray.cols(); col++){
+            for(int row=0; row<matArray.rows(); row++) {
+                double[] data = matArray.get(row, col);
+                data[0] = 1.5*data[0] - 0.5*mean;
+                return_mat.put(row, col, data);
+            }
+        }
+        return return_mat;
     }
 }
