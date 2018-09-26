@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     String pathname = "/storage/emulated/0/Android/data/com.example.varun.firedetectionju/files/FIRE_SAMPLE_1.jpg";
 
@@ -171,17 +171,7 @@ public class MainActivity extends AppCompatActivity {
         cancelButton.setVisibility(View.INVISIBLE);
 
         handler = new Handler(getApplicationContext().getMainLooper());
-        mainButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mainButton.setEnabled(false);
-                if(task2.getStatus() == AsyncTask.Status.RUNNING){
-                    task2.cancel(true);
-                }
-                while (task2.isCancelled()){}
-                takePicture();
-            }
-        });
+        mainButton.setOnClickListener(this);
     }
 
     @Override
@@ -206,6 +196,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         stopBackgroundThread();
         super.onPause();
+    }
+
+    @Override
+    public void onClick(View view) {
+        mainButton.setEnabled(false);
+        if(task2.getStatus() == AsyncTask.Status.RUNNING){
+            Log.d("MyTag", "task2 running");
+            task2.cancel(true);
+        }
+        while (task2.getStatus() == AsyncTask.Status.RUNNING){
+            Log.d("MyTag", " waiting for task2 to stop");
+        }
+        takePicture();
     }
 
     private void openCamera() {
