@@ -17,6 +17,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -87,7 +88,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private HandlerThread mBackgroundThread;
     private Handler handler;
 
-    final MyAsyncTask2 task2 = new MyAsyncTask2();
+    MyAsyncTask task;
+    MyAsyncTask2 task2;
 
     private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -201,13 +203,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         mainButton.setEnabled(false);
-        if(task2.getStatus() == AsyncTask.Status.RUNNING){
-            Log.d("MyTag", "task2 running");
-            task2.cancel(true);
-        }
-        while (task2.getStatus() == AsyncTask.Status.RUNNING){
-            Log.d("MyTag", " waiting for task2 to stop");
-        }
+
+        //if(task2.getStatus() == AsyncTask.Status.RUNNING){
+        //    Log.d("MyTag", "task2 running");
+        //    task2.cancel(true);
+        //}
+        //while (task2.getStatus() == AsyncTask.Status.RUNNING){
+        //    Log.d("MyTag", " waiting for task2 to stop");
+        //}
+
         takePicture();
     }
 
@@ -423,9 +427,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        final MyAsyncTask task = new MyAsyncTask();
-        task.execute();
-        task2.execute();
+        task = new MyAsyncTask();
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        task2 = new MyAsyncTask2();
+        task2.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
