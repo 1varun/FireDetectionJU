@@ -52,18 +52,18 @@ public class AnalyseFire {
         cbMean =(cbSum.val[0])/totalPixels;
         crMean =(crSum.val[0])/totalPixels;
 
-        Log.d("MyTAG1", Double.toString(rSum.val[0]));
-        Log.d("MyTAG1", Double.toString(gSum.val[0]));
-        Log.d("MyTAG1", Double.toString(bSum.val[0]));
-        Log.d("MyTAG1", Double.toString(ySum.val[0]));
-        Log.d("MyTAG1", Double.toString(cbSum.val[0]));
-        Log.d("MyTAG1", Double.toString(crSum.val[0]));
-        Log.d("MyTAG1", Double.toString(rMean));
-        Log.d("MyTAG1", Double.toString(gMean));
-        Log.d("MyTAG1", Double.toString(bMean));
-        Log.d("MyTAG1", Double.toString(yMean));
-        Log.d("MyTAG1", Double.toString(cbMean));
-        Log.d("MyTAG1", Double.toString(crMean));
+        Log.d("MyTAG1", "rSum: "+Double.toString(rSum.val[0]));
+        Log.d("MyTAG1", "gSum: "+Double.toString(gSum.val[0]));
+        Log.d("MyTAG1", "bSum: "+Double.toString(bSum.val[0]));
+        Log.d("MyTAG1", "ySum: "+Double.toString(ySum.val[0]));
+        Log.d("MyTAG1", "cbSum: "+Double.toString(cbSum.val[0]));
+        Log.d("MyTAG1", "crSum: "+Double.toString(crSum.val[0]));
+        Log.d("MyTAG1", "rMean: "+Double.toString(rMean));
+        Log.d("MyTAG1", "gMean: "+Double.toString(gMean));
+        Log.d("MyTAG1", "bMean: "+Double.toString(bMean));
+        Log.d("MyTAG1", "yMean: "+Double.toString(yMean));
+        Log.d("MyTAG1", "cbMean: "+Double.toString(cbMean));
+        Log.d("MyTAG1", "crMean: "+Double.toString(crMean));
 
 
         double[] rgb;
