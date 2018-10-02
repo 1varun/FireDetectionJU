@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressBar = findViewById(R.id.progressBar);
         output = findViewById(R.id.output);
         secondProg = findViewById(R.id.textView);
-        secondProg.setVisibility(View.INVISIBLE);
+        //secondProg.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
 
@@ -203,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         mainButton.setEnabled(false);
+        //secondProg.setVisibility(View.INVISIBLE);
 
         //if(task2.getStatus() == AsyncTask.Status.RUNNING){
         //    Log.d("MyTag", "task2 running");
@@ -447,7 +448,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected Integer doInBackground(Void... voids) {
             AnalyseFire fire = new AnalyseFire();
-            AnalyseFire2 fire2 = new AnalyseFire2();
             return fire.fireCheck();
         }
 
@@ -467,7 +467,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             else {
                 output.setText("FIRE Detected by 1st Algo!");
-                secondProg.setVisibility(View.VISIBLE);
+                //secondProg.setVisibility(View.VISIBLE);
+
             }
 
 
@@ -482,6 +483,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.onCancelled();
             progressBar.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
+            //secondProg.setVisibility(View.INVISIBLE);
             mainButton.setText(R.string.main_button);
             mainButton.setEnabled(true);
             output.setText(R.string.analysis_cancel_msg);
@@ -546,54 +548,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Core.merge(temp_g, green);
             Core.merge(temp_b, blue);
 
-            Mat a1 = Mat.zeros(x1, y1, CvType.CV_8UC1);
-            Mat b1 = Mat.zeros(x1, y1, CvType.CV_8UC1);
-            Mat g = Mat.zeros(x1, y1, CvType.CV_8UC1);
-            Mat a2 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+//            Mat a1 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+//            Mat b1 = Mat.zeros(x1, y1, CvType.CV_8UC1);
+//            Mat g = Mat.zeros(x1, y1, CvType.CV_8UC1);
+//            Mat a2 = Mat.zeros(x1, y1, CvType.CV_8UC1);
             //Mat b2 = Mat.zeros(x1, y1, CvType.CV_8UC1);
-            Mat h = Mat.zeros(x1, y1, CvType.CV_8UC1);
+//            Mat h = Mat.zeros(x1, y1, CvType.CV_8UC1);
+
+            double[] rgb;
+            int count_h = 0;
 
             for(int row=0; row<x1; row++){
                 for(int col=0; col<y1; col++) {
+                    int a1=0;
+                    int b1=0;
+                    int g=0;
+
+
                     if (isCancelled())
                         break;
-                    if(k.get(row, col)[0] >= l.get(row, col)[0])
-                        a1.put(row, col, 1);
-                    else
-                        a1.put(row, col, 0);
 
-                    if((k.get(row, col)[0] >= RED) && (l.get(row, col)[0] >= GREEN) && (m.get(row, col)[0] >= BLUE))
-                        b1.put(row, col, 1);
-                    else
-                        b1.put(row, col, 0);
+                    rgb = imgHSV.get(row, col);
+                    double rValue = rgb[0];
+                    double gValue = rgb[1];
+                    double bValue = rgb[2];
+
+                    if(rValue >= gValue)
+                        a1 = 1;
+//                    else
+//                        a1.put(row, col, 0);
+
+                    if((rValue >= RED) && (gValue >= GREEN) && (bValue >= BLUE))
+                        b1 = 1;
+//                    else
+//                        b1.put(row, col, 0);
 
                     if((newS.get(row, col)[0] <= 0.38) && (newV.get(row, col)[0] >= 1))
-                        g.put(row, col, 1);
-                    else
-                        g.put(row, col, 0);
+                        g = 1;
+//                    else
+//                        g.put(row, col, 0);
 
-                    if((g.get(row, col)[0]!=0.0) && (a1.get(row, col)[0]!=0.0) && (b1.get(row, col)[0]==1)) {
-                        h.put(row, col, 1);
+                    if(g==1 && a1==1 && b1==1) {
+                        count_h++;
+//                        h.put(row, col, 1);
                         //newV.put(row, col, 1);
-                        a2.put(row, col, row);
+//                        a2.put(row, col, row);
                         //b2.put(row, col, col);
                     }
-                    else {
-                        h.put(row, col, 0);
+//                    else {
+//                        h.put(row, col, 0);
                         //newV.put(row, col, 0);
-                    }
+//                    }
                 }
                 if (isCancelled())
                     break;
             }
-            Log.d("MyTAG", "test3");
 
-            Scalar h_value = Core.sumElems(h);
-            Scalar a2_value = Core.sumElems(a2);
-            Log.d("MyTAG", "h_value :"+h_value);
-            Log.d("MyTAG", "a2_value :"+a2_value);
+//            Scalar h_value = Core.sumElems(h);
+//            //Scalar a2_value = Core.sumElems(a2);
+            Log.d("MyTAG", "h_value :"+count_h);
+//            //Log.d("MyTAG", "a2_value :"+a2_value);
 
-            if (h_value.val[0] > 300) {
+            if (count_h > 300) {
                 //count = count + 1;
                 Log.d("MyTAG", "FIRE");
 
@@ -613,24 +629,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            secondProg.setText("Second process running in Background.");
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
             int fireCheck = integer;
-            if (fireCheck==0)
+            if (fireCheck==0) {
                 output.setText("FIRE Detected only by 1st Algo!");
+                secondProg.setText("Second Process Ended.");
+            }
             else
-                output.setText("FIRE Detected by both Algo!");
-
-            secondProg.setVisibility(View.INVISIBLE);
+                secondProg.setText("FIRE Detected by 2nd Algo!");
         }
 
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            secondProg.setVisibility(View.INVISIBLE);
+            secondProg.setText("Second process Cancelled!");
+            //secondProg.setVisibility(View.INVISIBLE);
         }
     }
 
